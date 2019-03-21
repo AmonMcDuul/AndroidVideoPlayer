@@ -101,24 +101,13 @@ public class SplashScreen extends AppCompatActivity {
 
     }
 
-
     class BackgroundTask extends AsyncTask<Void,Void,Void>{
 
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                String[] projection = {MediaStore.Video.VideoColumns.DATA,MediaStore.Video.Media.DISPLAY_NAME};
-                Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-
-                cursor.moveToFirst();
-                do {
-                    Bitmap bitmap =ThumbnailUtils.createVideoThumbnail(cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)),MediaStore.Images.Thumbnails.MINI_KIND);
-                    bitmap = ThumbnailUtils.extractThumbnail(bitmap,96,96);
-                    if(bitmap!=null)
-                        videos.add(new Video(cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME)),cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)), bitmap));
-                    Log.e("video info :", cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)));
-                } while (cursor.moveToNext());
+                Bitmap bMap = ThumbnailUtils.createVideoThumbnail("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" , MediaStore.Video.Thumbnails.MICRO_KIND);
+                videos.add(new Video("test", "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4", bMap));
 
             } catch (Exception e) {
                 e.printStackTrace();
