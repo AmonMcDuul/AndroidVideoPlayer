@@ -19,8 +19,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.File;
@@ -29,9 +31,89 @@ import java.util.ArrayList;
 import static android.os.Build.VERSION.SDK;
 import static android.os.Build.VERSION.SDK_INT;
 
-public class SplashScreen extends AppCompatActivity {
+public class SplashScreen extends AppCompatActivity implements View.OnClickListener {
+
+    private Button button;
+    private Button buttontwo;
 
     static ArrayList<Video> videos ;
+    static  final int requestCode = 1;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        try {
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_splash_screen);
+            videos = new ArrayList<>();
+            //  checkPermission();
+            //  new BackgroundTask().execute();
+
+//            getSupportActionBar().hide();
+//            getActionBar().hide();
+
+            button =(Button)findViewById(R.id.local);
+            buttontwo =(Button)findViewById(R.id.server);
+            button.setOnClickListener(this);
+            buttontwo.setOnClickListener(this);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    @Override
+    public void onClick(View v) {
+
+
+        switch(v.getId()){
+
+            case R.id.local:
+
+                try {
+                    Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                    String[] projection = {MediaStore.Video.VideoColumns.DATA,MediaStore.Video.Media.DISPLAY_NAME};
+                    Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+
+                    cursor.moveToFirst();
+                    do {
+                        Bitmap bitmap =ThumbnailUtils.createVideoThumbnail(cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)),MediaStore.Images.Thumbnails.MINI_KIND);
+                        bitmap = ThumbnailUtils.extractThumbnail(bitmap,96,96);
+                        if(bitmap!=null)
+                            videos.add(new Video(cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME)),cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)), bitmap));
+                        Log.e("video info :", cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)));
+                    } while (cursor.moveToNext());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //return null;
+
+                startActivity(new Intent(SplashScreen.this,MainActivity.class));
+                Toast.makeText(this, "Lokale data wordt geladen jeuh", Toast.LENGTH_LONG).show();
+                break;
+
+
+            case R.id.server:
+
+                try {
+                    Bitmap bMap = ThumbnailUtils.createVideoThumbnail("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" , MediaStore.Video.Thumbnails.MICRO_KIND);
+                    videos.add(new Video("test", "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4", bMap));
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                startActivity(new Intent(SplashScreen.this,MainActivity.class));
+                Toast.makeText(this, "Server data wordt geladen jeuh", Toast.LENGTH_LONG).show();
+                break;
+
+        }
+    }
+
+/*    static ArrayList<Video> videos ;
     static  final int requestCode = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,5 +203,5 @@ public class SplashScreen extends AppCompatActivity {
             finish();
             startActivity(new Intent(SplashScreen.this,MainActivity.class));
         }
-    }
+    }*/
 }

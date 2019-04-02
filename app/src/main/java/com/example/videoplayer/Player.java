@@ -51,7 +51,10 @@ public class Player extends AppCompatActivity implements BetterVideoCallback {
 
             // Sets the source to the HTTP URL held in the TEST_URL variable.
             // To play files, you can use Uri.fromFile(new File("..."))
-            player.setSource(Uri.parse("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"));
+
+            //Voor de bunny voorbeeld video
+            //player.setSource(Uri.parse("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"));
+            player.setSource(Uri.fromFile(new File(SplashScreen.videos.get(position).getPath())));
            // player.start();
             player.setAutoPlay(true);
             player.enableSwipeGestures();
