@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageView share;
     ImageView delete;
     ImageView play;
+    ImageView uplink;
     ConstraintLayout constraintLayout;
     MyAdapter myAdapter;
     int pos=0;
@@ -27,15 +28,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         recyclerView = findViewById(R.id.recyclerView);
-        play = findViewById(R.id.play);
         delete = findViewById(R.id.delete);
         share = findViewById(R.id.share);
+
+        uplink = findViewById(R.id.uplink);
+
         constraintLayout = findViewById(R.id.constraintLayout2);
 
 
-        play.setOnClickListener(this);
         delete.setOnClickListener(this);
         share.setOnClickListener(this);
+        uplink.setOnClickListener(this);
 
         myAdapter = new MyAdapter(getApplicationContext(), SplashScreen.videos, new CustomItemClickListner() {
             @Override
@@ -70,12 +73,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             int id = v.getId();
             switch (id) {
-                case R.id.play: {
-                    Intent intent = new Intent(MainActivity.this, Player.class);
-                    intent.putExtra("position", pos);
-                    startActivity(intent);
-                    break;
-                }
                 case R.id.share: {
                     Intent sendIntent = new Intent(Intent.ACTION_SEND);
                     sendIntent.setType("video/*");
@@ -93,6 +90,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     MediaScannerConnection.scanFile(getApplicationContext(), new String[]{SplashScreen.videos.get(pos).getPath()}, null, null);
                     SplashScreen.videos.remove(pos);
                     myAdapter.updateData(SplashScreen.videos);
+                    break;
+                }
+                case R.id.uplink: {
+                    //code to uplink the video so someone can downlink it
                     break;
                 }
             }
