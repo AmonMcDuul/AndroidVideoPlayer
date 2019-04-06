@@ -10,31 +10,35 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-    ArrayList<Video> videos;
-    Context context;
-    CustomItemClickListner customItemClickListner;
+    private ArrayList<Video> videos;
+    private Context context;
+    private CustomItemClickListner customItemClickListner;
 
-    public MyAdapter(Context context , ArrayList<Video> videos,CustomItemClickListner customItemClickListner) {
+    public MyAdapter(Context context, ArrayList<Video> videos, CustomItemClickListner customItemClickListner) {
         this.videos = videos;
         this.context = context;
         this.customItemClickListner = customItemClickListner;
     }
 
+    /**
+     * On create view holder, special adapter
+     * @param viewGroup current view group
+     * @param i
+     * @return bool
+     */
     @NonNull
     @Override
     public MyAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View view = inflater.inflate(R.layout.list_item,null);
+        final View view = inflater.inflate(R.layout.list_item, null);
         final ViewHolder viewHolder = new ViewHolder(view);
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                customItemClickListner.onItemClick(view,viewHolder.getAdapterPosition());
+                customItemClickListner.onItemClick(view, viewHolder.getAdapterPosition());
             }
         });
         view.setOnLongClickListener(new View.OnLongClickListener() {
@@ -46,31 +50,45 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         });
         return viewHolder;
     }
-    public  void updateData(ArrayList<Video> videos){
+
+    /**
+     * Update data for custom adapter
+     * @param videos
+     */
+    void updateData(ArrayList<Video> videos) {
         this.videos = videos;
         notifyDataSetChanged();
     }
 
+    /**
+     * On bind view holder
+     * @param viewHolder
+     * @param i
+     */
     @Override
     public void onBindViewHolder(@NonNull MyAdapter.ViewHolder viewHolder, int i) {
         Video video = videos.get(i);
         viewHolder.title.setText(video.title);
-        if(video.getThumb()==null){
-            Toast.makeText(context,"thumbnail is null",Toast.LENGTH_SHORT).show();
+        if (video.getThumb() == null) {
+            Toast.makeText(context, "thumbnail is null", Toast.LENGTH_SHORT).show();
         }
         viewHolder.thumbnail.setImageBitmap(video.getThumb());
     }
 
+    /**
+     * Checks how many videos are in array
+     * @return size of videos array
+     */
     @Override
     public int getItemCount() {
         return videos.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView thumbnail ;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView thumbnail;
         TextView title;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             thumbnail = itemView.findViewById(R.id.thumb);
             title = itemView.findViewById(R.id.title);

@@ -4,8 +4,8 @@ import android.graphics.Bitmap;
 
 public class Video {
     String title;
-    String path;
-    Bitmap thumb;
+    private String path;
+    private Bitmap thumb;
 
     public Video(String title, String path, Bitmap thumb) {
         this.title = title;
@@ -21,7 +21,7 @@ public class Video {
         this.title = title;
     }
 
-    public String getPath() {
+    String getPath() {
         return path;
     }
 
@@ -29,7 +29,7 @@ public class Video {
         this.path = path;
     }
 
-    public Bitmap getThumb() {
+    Bitmap getThumb() {
         return thumb;
     }
 

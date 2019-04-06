@@ -1,23 +1,18 @@
 package com.example.videoplayer;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StrictMode;
+import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -25,183 +20,143 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
-import static android.os.Build.VERSION.SDK;
-import static android.os.Build.VERSION.SDK_INT;
-
 public class SplashScreen extends AppCompatActivity implements View.OnClickListener {
+    static ArrayList<Video> videos;
 
-    private Button button;
-    private Button buttontwo;
-
-    static ArrayList<Video> videos ;
-    static  final int requestCode = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+
             requestWindowFeature(Window.FEATURE_NO_TITLE);
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_splash_screen);
+
+            requestPermissionForReadExtertalStorage();
             videos = new ArrayList<>();
-            //  checkPermission();
-            //  new BackgroundTask().execute();
 
-//            getSupportActionBar().hide();
-//            getActionBar().hide();
-
-            button =(Button)findViewById(R.id.local);
-            buttontwo =(Button)findViewById(R.id.server);
+            Button button = findViewById(R.id.local);
+            Button buttontwo = findViewById(R.id.server);
             button.setOnClickListener(this);
             buttontwo.setOnClickListener(this);
 
-        }catch (Exception e){
+
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
         }
 
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        System.out.print("lel");
+        finish();
+    }
+
+    public void requestPermissionForReadExtertalStorage() throws Exception {
+        try {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    0x3);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
     public void onClick(View v) {
-
-
-        switch(v.getId()){
-
+        switch (v.getId()) {
             case R.id.local:
-
                 try {
-                    Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                    String[] projection = {MediaStore.Video.VideoColumns.DATA,MediaStore.Video.Media.DISPLAY_NAME};
-                    Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+                    File uri = Environment.getExternalStorageDirectory();
+                    String[] projection = {MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME};
+                    Cursor cursor = getContentResolver().query(Uri.fromFile(uri), projection, null, null, null);
 
-                    cursor.moveToFirst();
-                    do {
-                        Bitmap bitmap =ThumbnailUtils.createVideoThumbnail(cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)),MediaStore.Images.Thumbnails.MINI_KIND);
-                        bitmap = ThumbnailUtils.extractThumbnail(bitmap,96,96);
-                        if(bitmap!=null)
-                            videos.add(new Video(cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME)),cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)), bitmap));
-                        Log.e("video info :", cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)));
-                    } while (cursor.moveToNext());
+                    if (cursor != null) {
+                        cursor.moveToFirst();
+                        do {
+                            Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)), MediaStore.Images.Thumbnails.MINI_KIND);
+                            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 96, 96);
+                            if (bitmap != null)
+                                videos.add(new Video(cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME)), cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)), bitmap));
+                            Log.e("video info :", cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)));
+                        } while (cursor.moveToNext());
+                    }
+
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                //return null;
 
-                startActivity(new Intent(SplashScreen.this,MainActivity.class));
+                startActivity(new Intent(SplashScreen.this, MainActivity.class));
                 Toast.makeText(this, "Lokale data wordt geladen jeuh", Toast.LENGTH_LONG).show();
                 break;
 
-
             case R.id.server:
-
                 try {
-                    Bitmap bMap = ThumbnailUtils.createVideoThumbnail("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" , MediaStore.Video.Thumbnails.MICRO_KIND);
-                    videos.add(new Video("test", "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4", bMap));
-
-                } catch (Exception e) {
+                    JSONArray jsonObject = getJSONObjectFromURL("http://10.0.2.2:8080/files");
+                    System.out.println(jsonObject);
+                    for (int i = 0; i < jsonObject.length(); i++) {
+                        JSONObject item = jsonObject.getJSONObject(i);
+                        Object url = item.get("url");
+                        Object filename = item.get("filename");
+                        Bitmap bMap = ThumbnailUtils.createVideoThumbnail(url.toString(), MediaStore.Video.Thumbnails.MICRO_KIND);
+                        Video video = new Video(filename.toString(), url.toString(), bMap);
+                        if (!videos.contains(video)) {
+                            videos.add(video);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                startActivity(new Intent(SplashScreen.this,MainActivity.class));
+                startActivity(new Intent(SplashScreen.this, MainActivity.class));
                 Toast.makeText(this, "Server data wordt geladen jeuh", Toast.LENGTH_LONG).show();
                 break;
 
         }
     }
 
-/*    static ArrayList<Video> videos ;
-    static  final int requestCode = 1;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        try {
-            requestWindowFeature(Window.FEATURE_NO_TITLE);
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_splash_screen);
-            videos = new ArrayList<>();
-            checkPermission();
-          //  new BackgroundTask().execute();
+    public static JSONArray getJSONObjectFromURL(String urlString) throws IOException, JSONException {
+        HttpURLConnection urlConnection = null;
+        URL url = new URL(urlString);
+        urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.setReadTimeout(10000 /* milliseconds */);
+        urlConnection.setConnectTimeout(15000 /* milliseconds */);
+        urlConnection.setDoOutput(true);
+        urlConnection.connect();
 
-//            getSupportActionBar().hide();
-//            getActionBar().hide();
-        }catch (Exception e){
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_SHORT).show();
+        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line + "\n");
         }
+        br.close();
 
+        String jsonString = sb.toString();
+        System.out.println("JSON: " + jsonString);
+
+        return new JSONArray(jsonString);
     }
-    public void checkPermission(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED){
-                //PERMISSION GRANTED
-                new BackgroundTask().execute();
-            }else{
-                ActivityCompat.requestPermissions(SplashScreen.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},requestCode);
-            }
-        }else{
-            new BackgroundTask().execute();
-            Toast.makeText(getApplicationContext(),"permission granted",Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if(grantResults[0]==PackageManager.PERMISSION_GRANTED&&requestCode==SplashScreen.requestCode){
-            new BackgroundTask().execute();
-            Toast.makeText(getApplicationContext(),"permission granted",Toast.LENGTH_SHORT).show();
-        }else{
-            showDetails();
-        }
-
-    }
-    public void showDetails(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(SplashScreen.this);
-        builder.setTitle("Storage Write Permission")
-                .setMessage("This permission is necessary to access the videos on this device hope you understand please give this permission to move farward with the app")
-                .setPositiveButton(android.R.string.ok, new Dialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            ActivityCompat.requestPermissions(SplashScreen.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},requestCode);
-                        }
-                    }
-                });
-                builder.setNegativeButton(android.R.string.cancel, new Dialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                });
-                builder.create();
-                builder.show();
-
-    }
-
-    class BackgroundTask extends AsyncTask<Void,Void,Void>{
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                Bitmap bMap = ThumbnailUtils.createVideoThumbnail("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" , MediaStore.Video.Thumbnails.MICRO_KIND);
-                videos.add(new Video("test", "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4", bMap));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            finish();
-            startActivity(new Intent(SplashScreen.this,MainActivity.class));
-        }
-    }*/
 }
