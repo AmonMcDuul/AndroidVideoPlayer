@@ -86,9 +86,9 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.local:
                 try {
-                    File uri = Environment.getExternalStorageDirectory();
+                    Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
                     String[] projection = {MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME};
-                    Cursor cursor = getContentResolver().query(Uri.fromFile(uri), projection, null, null, null);
+                    Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
 
                     if (cursor != null) {
                         cursor.moveToFirst();
