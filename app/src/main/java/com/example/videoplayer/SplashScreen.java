@@ -1,14 +1,12 @@
 package com.example.videoplayer;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -25,7 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -46,7 +43,7 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_splash_screen);
 
-            requestPermissionForReadExtertalStorage();
+            requestPermissionForReadExternalStorage();
             videos = new ArrayList<>();
 
             Button button = findViewById(R.id.local);
@@ -69,7 +66,7 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
         finish();
     }
 
-    public void requestPermissionForReadExtertalStorage() throws Exception {
+    public void requestPermissionForReadExternalStorage() throws Exception {
         try {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     0x3);

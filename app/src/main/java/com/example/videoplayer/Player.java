@@ -3,7 +3,6 @@ package com.example.videoplayer;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -41,10 +40,11 @@ public class Player extends AppCompatActivity implements BetterVideoCallback {
 
             player.setCallback(this);
 
-            File applicationFile =  new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOWNLOADS)+ "/" + SplashScreen.videos.get(position).getPath());
+            System.out.println(SplashScreen.videos.get(position).getPath());
 
-            if(applicationFile.exists()){
+            File file = new File(SplashScreen.videos.get(position).getPath());
+
+            if(file.exists()){
                 player.setSource(Uri.fromFile(new File(SplashScreen.videos.get(position).getPath())));
             } else {
                 player.setSource(Uri.parse(SplashScreen.videos.get(position).getPath()));

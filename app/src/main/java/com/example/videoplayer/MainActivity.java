@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 case R.id.uplink: {
                     File file = new File(SplashScreen.videos.get(pos).getPath());
-                    doFileUpload("/storage/self/primary/Download/fish (1).mp4");
+                    doFileUpload(file.getAbsolutePath());
                 }
             }
         } catch (Exception e) {
@@ -105,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .load("http://139.59.151.31:8080/uploadfile")
                 .setMultipartFile("uploadfile", "multipart/form-data", new File(existingFilename))
                 .asJsonObject();
+
+        Toast.makeText(this, "Uploading done", Toast.LENGTH_LONG).show();
     }
 
     @Override
