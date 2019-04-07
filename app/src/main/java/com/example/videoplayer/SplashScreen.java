@@ -110,7 +110,7 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
 
             case R.id.server:
                 try {
-                    JSONArray jsonObject = getJSONObjectFromURL("http://10.0.2.2:8080/files");
+                    JSONArray jsonObject = getJSONObjectFromURL("http://139.59.151.31:8080/files");
                     System.out.println(jsonObject);
                     for (int i = 0; i < jsonObject.length(); i++) {
                         JSONObject item = jsonObject.getJSONObject(i);

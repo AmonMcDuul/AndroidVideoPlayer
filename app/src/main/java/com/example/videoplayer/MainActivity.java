@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.koushikdutta.ion.Ion;
 
@@ -108,8 +109,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void doFileUpload(String existingFilename) {
+        Toast.makeText(this, "Uploading video", Toast.LENGTH_LONG).show();
+
         Ion.with(this)
-                .load("http://10.0.2.2:8080/uploadfile")
+                .load("http://139.59.151.31:8080/uploadfile")
                 .setMultipartFile("uploadfile", "multipart/form-data", new File(existingFilename))
                 .asJsonObject();
     }
