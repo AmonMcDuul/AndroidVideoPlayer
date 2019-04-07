@@ -32,6 +32,6 @@ From Android Studio:
 3. Fill in the keystore information *(you only need to do this once manually and then let Android Studio remember it)*
 
 ## Maintainers
-This project is mantained by:
+This project is maintained by:
 Mike Ouali
 Joran Schols

@@ -13,28 +13,13 @@ public class Video {
         this.thumb = thumb;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     String getPath() {
         return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     Bitmap getThumb() {
         return thumb;
     }
 
-    public void setThumb(Bitmap thumb) {
-        this.thumb = thumb;
-    }
 }
 

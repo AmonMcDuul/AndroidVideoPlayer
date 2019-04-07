@@ -11,7 +11,6 @@ import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -47,25 +46,26 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
             videos = new ArrayList<>();
 
             Button button = findViewById(R.id.local);
-            Button buttontwo = findViewById(R.id.server);
+            Button buttonTwo = findViewById(R.id.server);
             button.setOnClickListener(this);
-            buttontwo.setOnClickListener(this);
-
-
+            buttonTwo.setOnClickListener(this);
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
         }
-
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        System.out.print("lel");
         finish();
     }
 
+    /**
+     * Ask permission from user to use specific storage
+     *
+     * @throws Exception when permission has been denied
+     */
     public void requestPermissionForReadExternalStorage() throws Exception {
         try {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -76,8 +76,15 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * On click of SplashScreen view
+     * Clears set videos for refresh
+     *
+     * @param v SplashScreen view
+     */
     @Override
     public void onClick(View v) {
+        // clear videos we want newest videos
         videos.clear();
 
         switch (v.getId()) {
@@ -94,7 +101,6 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
                             bitmap = ThumbnailUtils.extractThumbnail(bitmap, 96, 96);
                             if (bitmap != null)
                                 videos.add(new Video(cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME)), cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)), bitmap));
-                            Log.e("video info :", cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)));
                         } while (cursor.moveToNext());
                     }
                 } catch (Exception e) {
@@ -102,7 +108,7 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
                 }
 
                 startActivity(new Intent(SplashScreen.this, MainActivity.class));
-                Toast.makeText(this, "Lokale data wordt geladen jeuh", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Loading local videos", Toast.LENGTH_LONG).show();
                 break;
 
             case R.id.server:
@@ -126,19 +132,26 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
                 }
 
                 startActivity(new Intent(SplashScreen.this, MainActivity.class));
-                Toast.makeText(this, "Server data wordt geladen jeuh", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Loading server videos", Toast.LENGTH_LONG).show();
                 break;
-
         }
     }
 
+    /**
+     * Get JSON object from URL
+     *
+     * @param urlString URL to get JSON from
+     * @return JSONArray
+     * @throws IOException   If object does not exist throw IO exception
+     * @throws JSONException If json can not be parsed throw JSON exception
+     */
     public static JSONArray getJSONObjectFromURL(String urlString) throws IOException, JSONException {
-        HttpURLConnection urlConnection = null;
+        HttpURLConnection urlConnection;
         URL url = new URL(urlString);
         urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestMethod("GET");
-        urlConnection.setReadTimeout(10000 /* milliseconds */);
-        urlConnection.setConnectTimeout(15000 /* milliseconds */);
+        urlConnection.setReadTimeout(10000);
+        urlConnection.setConnectTimeout(15000);
         urlConnection.setDoOutput(true);
         urlConnection.connect();
 
@@ -147,7 +160,7 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
 
         String line;
         while ((line = br.readLine()) != null) {
-            sb.append(line + "\n");
+            sb.append(line).append("\n");
         }
         br.close();
 

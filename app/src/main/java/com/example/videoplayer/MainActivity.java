@@ -81,7 +81,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case R.id.delete: {
                     File file = new File(SplashScreen.videos.get(pos).getPath());
                     if (file.exists()) {
-                        file.delete();
+                        boolean delete = file.delete();
+                        if (delete) {
+                            Toast.makeText(this, "Video has been deleted", Toast.LENGTH_LONG).show();
+                        }
                     }
                     MediaScannerConnection.scanFile(getApplicationContext(), new String[]{SplashScreen.videos.get(pos).getPath()}, null, null);
                     SplashScreen.videos.remove(pos);
@@ -98,6 +101,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Upload file with chosen file
+     * @param existingFilename existing file name
+     */
     private void doFileUpload(String existingFilename) {
         Toast.makeText(this, "Uploading video", Toast.LENGTH_LONG).show();
 
@@ -116,6 +123,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             super.onBackPressed();
         }
-
     }
 }

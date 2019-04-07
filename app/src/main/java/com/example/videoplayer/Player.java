@@ -44,7 +44,7 @@ public class Player extends AppCompatActivity implements BetterVideoCallback {
 
             File file = new File(SplashScreen.videos.get(position).getPath());
 
-            if(file.exists()){
+            if (file.exists()) {
                 player.setSource(Uri.fromFile(new File(SplashScreen.videos.get(position).getPath())));
             } else {
                 player.setSource(Uri.parse(SplashScreen.videos.get(position).getPath()));
