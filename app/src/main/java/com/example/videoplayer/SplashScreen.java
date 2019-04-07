@@ -81,6 +81,8 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        videos.clear();
+
         switch (v.getId()) {
             case R.id.local:
                 try {
@@ -98,8 +100,6 @@ public class SplashScreen extends AppCompatActivity implements View.OnClickListe
                             Log.e("video info :", cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA)));
                         } while (cursor.moveToNext());
                     }
-
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

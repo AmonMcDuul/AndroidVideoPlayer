@@ -3,26 +3,37 @@ package com.example.videoplayer;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
+import com.koushikdutta.ion.Ion;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     RecyclerView recyclerView;
     ImageView share;
     ImageView delete;
-    ImageView play;
     ImageView uplink;
     ConstraintLayout constraintLayout;
     MyAdapter myAdapter;
-    int pos=0;
+    int pos = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,11 +41,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recyclerView = findViewById(R.id.recyclerView);
         delete = findViewById(R.id.delete);
         share = findViewById(R.id.share);
-
         uplink = findViewById(R.id.uplink);
-
         constraintLayout = findViewById(R.id.constraintLayout2);
-
 
         delete.setOnClickListener(this);
         share.setOnClickListener(this);
@@ -42,30 +50,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         myAdapter = new MyAdapter(getApplicationContext(), SplashScreen.videos, new CustomItemClickListner() {
             @Override
-            public void onItemClick(View v, int postion) {
-                Intent intent = new Intent(MainActivity.this,Player.class);
-                intent.putExtra("position",postion);
+            public void onItemClick(View v, int position) {
+                Intent intent = new Intent(MainActivity.this, Player.class);
+                intent.putExtra("position", position);
                 startActivity(intent);
             }
 
             @Override
             public void onItemLongClick(int position) {
-                if(constraintLayout.getVisibility()==View.VISIBLE){
+                if (constraintLayout.getVisibility() == View.VISIBLE) {
                     constraintLayout.setVisibility(View.GONE);
-                }else {
+                } else {
                     constraintLayout.setVisibility(View.VISIBLE);
                 }
 
-                pos=position;
+                pos = position;
             }
         });
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
-
         recyclerView.setAdapter(myAdapter);
-
-
     }
 
     @Override
@@ -93,21 +98,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 }
                 case R.id.uplink: {
-                    //code to uplink the video so someone can downlink it
-                    break;
+                    File file = new File(SplashScreen.videos.get(pos).getPath());
+                    doFileUpload("/storage/self/primary/Download/fish (1).mp4");
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private void doFileUpload(String existingFilename) {
+        Ion.with(this)
+                .load("http://10.0.2.2:8080/uploadfile")
+                .setMultipartFile("uploadfile", "multipart/form-data", new File(existingFilename))
+                .asJsonObject();
+    }
+
     @Override
     public void onBackPressed() {
-
-        if(constraintLayout.getVisibility()==View.VISIBLE){
+        if (constraintLayout.getVisibility() == View.VISIBLE) {
             constraintLayout.setVisibility(View.GONE);
-        }else {
+        } else {
             super.onBackPressed();
         }
 
